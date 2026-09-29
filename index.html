@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>长音频波形缩略图生成器</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header>
+  <h1>长音频波形缩略图生成器</h1>
+  <p class="subtitle">全量解码 / 分块解码 / 降采样 三种方案对比 · 纯 Web 技术 · 无框架</p>
+</header>
+
+<main>
+  <section class="panel" id="panel-source">
+    <h2>1. 选择音频</h2>
+    <div class="row">
+      <label class="btn file-btn">
+        选择本地音频文件
+        <input type="file" id="file-input" accept="audio/*,.wav,.mp3,.ogg,.flac,.m4a" hidden>
+      </label>
+      <span id="drop-hint">或将文件拖入页面</span>
+    </div>
+    <div class="row synth-row">
+      <span>没有长音频？生成测试文件：</span>
+      <label>时长
+        <select id="synth-minutes">
+          <option value="5">5 分钟</option>
+          <option value="20">20 分钟</option>
+          <option value="65" selected>65 分钟（1 小时+）</option>
+          <option value="125">125 分钟（2 小时+）</option>
+        </select>
+      </label>
+      <label>采样率
+        <select id="synth-rate">
+          <option value="8000" selected>8000 Hz（文件小）</option>
+          <option value="16000">16000 Hz</option>
+          <option value="44100">44100 Hz（文件很大）</option>
+        </select>
+      </label>
+      <button id="btn-synth" class="btn">生成测试 WAV</button>
+    </div>
+    <div id="file-info" class="info-line">尚未加载音频</div>
+  </section>
+
+  <section class="panel" id="panel-strategy">
+    <h2>2. 生成波形</h2>
+    <div class="row">
+      <label>解码方案
+        <select id="strategy-select">
+          <option value="full">全量解码（基线：一次性解码整个文件）</option>
+          <option value="chunked">分块解码（逐块解码，PCM 即用即弃）</option>
+          <option value="downsample">降采样（8kHz 单声道解码后再算峰值）</option>
+        </select>
+      </label>
+      <button id="btn-run" class="btn primary" disabled>生成波形</button>
+      <button id="btn-run-all" class="btn" disabled>依次运行三种方案对比</button>
+      <button id="btn-cancel" class="btn danger" disabled>取消</button>
+      <button id="btn-clear-cache" class="btn">清除缓存</button>
+    </div>
+    <div class="row progress-row">
+      <progress id="progress" value="0" max="1"></progress>
+      <span id="status">空闲</span>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-metrics">
+    <h2>3. 性能对比 <span class="hint">（堆内存数据依赖 Chrome 的 performance.memory，其他浏览器显示 —）</span></h2>
+    <table id="metrics-table">
+      <thead>
+        <tr>
+          <th>方案</th><th>耗时</th><th>堆内存增量</th><th>堆内存峰值</th>
+          <th>长任务数</th><th>峰值桶数</th><th>备注</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section class="panel" id="panel-view">
+    <h2>4. 波形视图 <span class="hint">（滚轮缩放 · 拖拽平移 · 双击适应全曲）</span></h2>
+    <div class="row">
+      <button id="btn-zoom-in" class="btn" disabled>放大</button>
+      <button id="btn-zoom-out" class="btn" disabled>缩小</button>
+      <button id="btn-zoom-fit" class="btn" disabled>适应全曲</button>
+      <span id="view-info" class="info-line"></span>
+      <span class="spacer"></span>
+      <label>导出宽度
+        <select id="export-width">
+          <option value="2048">2048 px</option>
+          <option value="4096" selected>4096 px</option>
+          <option value="8192">8192 px</option>
+        </select>
+      </label>
+      <button id="btn-export" class="btn" disabled>导出 PNG</button>
+    </div>
+    <div id="canvas-wrap">
+      <canvas id="wave-canvas"></canvas>
+      <div id="canvas-empty">生成波形后在此显示</div>
+    </div>
+  </section>
+
+  <div id="toast" hidden></div>
+</main>
+
+<footer>
+  <p>技术栈：Web Audio · OfflineAudioContext · Canvas · Web Worker · PerformanceObserver · IndexedDB</p>
+</footer>
+
+<script src="js/db.js"></script>
+<script src="js/metrics.js"></script>
+<script src="js/pyramid.js"></script>
+<script src="js/strategies.js"></script>
+<script src="js/renderer.js"></script>
+<script src="js/exporter.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
