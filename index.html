@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>长音频波形缩略图生成器</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header>
+  <h1>长音频波形缩略图生成器</h1>
+  <p class="sub">Web Audio · OfflineAudioContext · Canvas · Web Worker · PerformanceObserver · IndexedDB（无框架）</p>
+</header>
+
+<section class="panel controls">
+  <div class="row" id="dropzone">
+    <label class="btn file-btn">
+      选择音频文件
+      <input type="file" id="fileInput" accept="audio/*,.wav,.mp3,.m4a,.aac,.flac,.ogg">
+    </label>
+    <span class="hint">或拖拽文件到此处</span>
+    <span id="fileInfo" class="file-info">未加载文件</span>
+    <span class="spacer"></span>
+    <select id="demoLen">
+      <option value="10">10 分钟</option>
+      <option value="30">30 分钟</option>
+      <option value="60" selected>60 分钟</option>
+    </select>
+    <button id="demoBtn" class="btn">生成测试音频</button>
+  </div>
+
+  <div class="row">
+    <span class="label">解码方案：</span>
+    <label><input type="radio" name="scheme" value="full"> 全量解码</label>
+    <label><input type="radio" name="scheme" value="chunked" checked> 分块解码</label>
+    <label><input type="radio" name="scheme" value="downsample"> 降采样</label>
+    <button id="runBtn" class="btn primary" disabled>生成波形</button>
+    <button id="runAllBtn" class="btn" disabled>运行全部方案对比</button>
+    <button id="clearCacheBtn" class="btn ghost">清除缓存</button>
+  </div>
+
+  <div class="row progress-row">
+    <div id="progressWrap" class="progress-wrap"><div id="progressBar" class="progress-bar"></div></div>
+    <span id="status" class="status"></span>
+  </div>
+</section>
+
+<section class="panel">
+  <table class="metrics">
+    <thead>
+      <tr>
+        <th>方案</th><th>路径</th><th>总耗时</th><th>解码</th><th>峰计算</th>
+        <th>PCM 体积</th><th>保留数据</th><th>主线程堆增量</th><th>长任务</th><th>状态</th>
+      </tr>
+    </thead>
+    <tbody id="metricsBody"></tbody>
+  </table>
+  <p class="note">说明：堆增量仅统计主线程 JS 堆（Chrome 的 performance.memory），Worker 内占用不计入；
+  「PCM 体积」为解码后浮点采样理论大小，「保留数据」为金字塔实际占用。长任务数来自 PerformanceObserver。</p>
+</section>
+
+<section class="panel wave-panel">
+  <div class="wave-wrap"><canvas id="mainCanvas"></canvas></div>
+  <div class="overview-wrap"><canvas id="overviewCanvas"></canvas></div>
+  <div class="row wave-controls">
+    <button id="zoomIn" class="btn">放大</button>
+    <button id="zoomOut" class="btn">缩小</button>
+    <button id="zoomReset" class="btn">复位</button>
+    <span class="hint">滚轮缩放 · 拖动平移 · 总览条点击定位</span>
+    <span class="spacer"></span>
+    <button id="exportBtn" class="btn primary" disabled>导出当前视图 PNG</button>
+  </div>
+</section>
+
+<div id="toast" class="toast"></div>
+
+<script src="js/peaks.js"></script>
+<script src="js/metrics.js"></script>
+<script src="js/store.js"></script>
+<script src="js/renderer.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
